@@ -56,9 +56,45 @@ export const App: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050813] flex flex-col items-center justify-center text-cyan-400 space-y-4 font-['Orbitron']">
-        <Loader2 className="w-12 h-12 animate-spin glow-cyan" />
-        <p className="text-sm tracking-widest animate-pulse">KHỞI ĐỘNG HỆ THỐNG STARFARM...</p>
+      <div className="min-h-screen bg-[#030714] flex flex-col items-center justify-center text-cyan-400 p-6 select-none font-['Orbitron'] relative overflow-hidden">
+        {/* Background Nebula Atmosphere */}
+        <div className="absolute w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute w-[350px] h-[350px] bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
+
+        {/* Dual Quantum Orbital Ring Loader with 3D Emblem */}
+        <div className="relative w-28 h-28 flex items-center justify-center mb-6">
+          {/* Outer Cyan Ring */}
+          <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-cyan-400 border-r-cyan-400 animate-spin filter drop-shadow-[0_0_12px_rgba(0,242,254,0.9)]" />
+          
+          {/* Inner Purple Counter-Rotating Ring */}
+          <div className="absolute inset-2 rounded-full border-2 border-transparent border-b-purple-400 border-l-purple-400 animate-spin-reverse filter drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
+
+          {/* Center 3D Emblem with Pulse */}
+          <div className="w-16 h-16 rounded-2xl overflow-hidden border border-cyan-400/50 shadow-2xl filter drop-shadow-[0_0_15px_rgba(0,242,254,0.5)] animate-pulse flex items-center justify-center bg-[#070e24]">
+            <img
+              src="/assets/starfarm_emblem_hd.png"
+              alt="StarFarm"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.src = '/starfarm_favicon.svg';
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Loading Text & Status */}
+        <h2 className="text-base sm:text-lg font-black tracking-widest text-white uppercase drop-shadow-[0_2px_12px_rgba(0,242,254,0.6)]">
+          STARFARM: HỆ THỐNG GAIA PRIME
+        </h2>
+        
+        <p className="text-xs text-cyan-300/80 font-mono tracking-wider mt-1 mb-4 animate-pulse">
+          ĐANG TẢI BẢN ĐỒ VŨ TRỤ & PHI ĐỘI CHIẾN CƠ...
+        </p>
+
+        {/* Cyberpunk Progress Bar */}
+        <div className="w-64 sm:w-80 h-2 bg-[#081026] rounded-full border border-cyan-500/30 overflow-hidden shadow-inner relative">
+          <div className="h-full bg-gradient-to-r from-cyan-500 via-emerald-400 to-cyan-300 rounded-full animate-progress-indeterminate filter drop-shadow-[0_0_8px_rgba(0,242,254,0.8)]" />
+        </div>
       </div>
     );
   }

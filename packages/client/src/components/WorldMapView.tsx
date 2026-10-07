@@ -54,32 +54,30 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [activeZone, setActiveZone] = useState<InteractiveZone | null>(null);
-  const [playerPos, setPlayerPos] = useState({ x: 600, y: 500 });
-  const [activeDialogue, setActiveDialogue] = useState<string | null>(null);
+  const [playerPos, setPlayerPos] = useState({ x: 700, y: 550 });
 
   const equippedShip = profile.ships.find((s) => s.isEquipped) || profile.ships[0];
   const readyCropsCount = profile.farmPlots.filter((p) => p.status === 'READY').length;
 
-  // Interactive zones in the 2D world
   const zones: InteractiveZone[] = [
     {
       id: 'FARM',
-      name: 'VƯỜN SINH HỌC GAIA',
-      sub: readyCropsCount > 0 ? `${readyCropsCount} ô đất đã chín! Nhấn [E] thu hoạch` : 'Nhấn [E] để gieo hạt & chăm sóc',
-      x: 350,
-      y: 350,
-      radius: 120,
+      name: 'VƯỜN SINH HỌC BIO-DOME',
+      sub: readyCropsCount > 0 ? `${readyCropsCount} ô đất đã chín! Nhấn [E] thu hoạch` : 'Nhấn [E] để gieo hạt & tưới cây',
+      x: 360,
+      y: 360,
+      radius: 140,
       icon: '🌱',
       color: '#10b981',
       action: onOpenFarm,
     },
     {
       id: 'HANGAR',
-      name: 'BẾN TÀU CHIẾN CƠ HANGAR',
-      sub: `Chiến cơ: ${equippedShip ? equippedShip.shipId : 'Scout Alpha'} • Nhấn [E] nâng cấp`,
-      x: 950,
-      y: 320,
-      radius: 130,
+      name: 'BẾN TÀU CHIẾN CƠ LP-01',
+      sub: `Chiến cơ: ${equippedShip ? equippedShip.shipId : 'Scout Alpha'} • Nhấn [E] mở Hangar`,
+      x: 1040,
+      y: 360,
+      radius: 150,
       icon: '🛸',
       color: '#00f2fe',
       action: onOpenHangar,
@@ -88,20 +86,20 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
       id: 'MARKET',
       name: 'CHỢ KHÔNG GIAN BAZAAR',
       sub: 'Gặp NPC Thương Nhân Jax • Nhấn [E] mở chợ',
-      x: 350,
-      y: 750,
-      radius: 120,
+      x: 360,
+      y: 780,
+      radius: 140,
       icon: '🏪',
       color: '#f59e0b',
       action: onOpenMarket,
     },
     {
       id: 'GACHA',
-      name: 'CỔNG LƯỢNG TỬ WARP',
+      name: 'CỔNG LƯỢNG TỬ WARP PORTAL',
       sub: `Triệu hồi chiến cơ SSR (Pity ${profile.pityCount}/10) • Nhấn [E] mở cổng`,
-      x: 950,
-      y: 750,
-      radius: 120,
+      x: 1040,
+      y: 780,
+      radius: 140,
       icon: '🌌',
       color: '#a855f7',
       action: onOpenGacha,
@@ -110,27 +108,26 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
       id: 'BATTLE',
       name: 'TRẠM RADAR XUẤT KÍCH',
       sub: 'Tác chiến diệt quái & boss hạm đội • Nhấn [E] xuất kích',
-      x: 650,
+      x: 700,
       y: 200,
-      radius: 110,
+      radius: 130,
       icon: '⚔️',
       color: '#ef4444',
       action: onStartBattle,
     },
     {
       id: 'INVENTORY',
-      name: 'KHO CHỨA VẬT PHẨM',
-      sub: 'Kho trang bị & khoáng sản • Nhấn [E] mở túi đồ',
-      x: 650,
-      y: 900,
-      radius: 110,
+      name: 'KHO CHỨA NĂNG LƯỢNG & VẬT PHẨM',
+      sub: 'Xem túi đồ, quặng & linh kiện • Nhấn [E] mở kho',
+      x: 700,
+      y: 920,
+      radius: 130,
       icon: '📦',
       color: '#6366f1',
       action: onOpenInventory,
     },
   ];
 
-  // 2D Game Loop & Canvas Renderer
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -148,24 +145,23 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
     };
     window.addEventListener('resize', handleResize);
 
-    // Game World State
-    const worldWidth = 1400;
-    const worldHeight = 1100;
+    const worldWidth = 1500;
+    const worldHeight = 1200;
 
     // Player State
     const player = {
-      x: 650,
+      x: 700,
       y: 550,
-      targetX: 650,
+      targetX: 700,
       targetY: 550,
-      speed: 4,
+      speed: 4.5,
       dir: 'DOWN' as 'DOWN' | 'UP' | 'LEFT' | 'RIGHT',
       isMoving: false,
       frame: 0,
       animTimer: 0,
     };
 
-    // Load Spritesheet assets
+    // Load HD Spritesheet Assets
     const charImg = new Image();
     charImg.src = '/assets/spritesheet_characters.png';
 
@@ -178,16 +174,13 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
     const baseMapImg = new Image();
     baseMapImg.src = '/assets/tileset_scifi_base_map.png';
 
-    // Keyboard Input State
+    // Keyboard state
     const keys: Record<string, boolean> = {};
 
     const handleKeyDown = (e: KeyboardEvent) => {
       keys[e.key.toLowerCase()] = true;
       if (e.key === 'e' || e.key === 'E') {
-        const found = zones.find((z) => {
-          const dist = Math.hypot(player.x - z.x, player.y - z.y);
-          return dist <= z.radius;
-        });
+        const found = zones.find((z) => Math.hypot(player.x - z.x, player.y - z.y) <= z.radius);
         if (found) {
           found.action();
         }
@@ -202,7 +195,6 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
       const clientX = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX;
       const clientY = 'touches' in e ? e.touches[0].clientY : (e as MouseEvent).clientY;
 
-      // Convert Screen to World Coords
       const cameraX = Math.max(0, Math.min(worldWidth - width, player.x - width / 2));
       const cameraY = Math.max(0, Math.min(worldHeight - height, player.y - height / 2));
 
@@ -215,15 +207,15 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
     canvas.addEventListener('mousedown', handlePointerDown);
     canvas.addEventListener('touchstart', handlePointerDown);
 
-    // Particles (ambient space embers & bio-spores)
-    const spores: { x: number; y: number; size: number; alpha: number; speedY: number; color: string }[] = [];
-    for (let i = 0; i < 60; i++) {
-      spores.push({
+    // Ambient floating space particles
+    const particles: { x: number; y: number; size: number; alpha: number; speedY: number; color: string }[] = [];
+    for (let i = 0; i < 70; i++) {
+      particles.push({
         x: Math.random() * worldWidth,
         y: Math.random() * worldHeight,
         size: Math.random() * 2.5 + 1,
         alpha: Math.random() * 0.7 + 0.3,
-        speedY: Math.random() * 0.4 + 0.2,
+        speedY: Math.random() * 0.35 + 0.15,
         color: ['#00f2fe', '#10b981', '#a855f7', '#fbbf24'][Math.floor(Math.random() * 4)],
       });
     }
@@ -234,7 +226,7 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
       const dt = (time - lastTime) / 1000;
       lastTime = time;
 
-      // 1. Update Player Movement via Keyboard
+      // 1. Keyboard Movement
       let moveX = 0;
       let moveY = 0;
 
@@ -244,7 +236,6 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
       if (keys['d'] || keys['arrowright']) moveX += 1;
 
       if (moveX !== 0 || moveY !== 0) {
-        // Normalize
         const len = Math.hypot(moveX, moveY);
         player.x += (moveX / len) * player.speed;
         player.y += (moveY / len) * player.speed;
@@ -258,12 +249,12 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
           player.dir = moveY > 0 ? 'DOWN' : 'UP';
         }
       } else {
-        // Mouse / Touch Click-to-Move
+        // Pointer Movement
         const dx = player.targetX - player.x;
         const dy = player.targetY - player.y;
         const dist = Math.hypot(dx, dy);
 
-        if (dist > 4) {
+        if (dist > 5) {
           player.x += (dx / dist) * player.speed;
           player.y += (dy / dist) * player.speed;
           player.isMoving = true;
@@ -278,20 +269,20 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
         }
       }
 
-      // Clamp Player to Map
-      player.x = Math.max(60, Math.min(worldWidth - 60, player.x));
-      player.y = Math.max(60, Math.min(worldHeight - 60, player.y));
+      // Map Bounds Clamping
+      player.x = Math.max(70, Math.min(worldWidth - 70, player.x));
+      player.y = Math.max(70, Math.min(worldHeight - 70, player.y));
       setPlayerPos({ x: Math.round(player.x), y: Math.round(player.y) });
 
-      // Animation Frame Step
+      // Walk Animation Step
       if (player.isMoving) {
-        player.animTimer += dt * 8;
-        player.frame = Math.floor(player.animTimer) % 4;
+        player.animTimer += dt * 9;
+        player.frame = Math.floor(player.animTimer) % 3;
       } else {
         player.frame = 0;
       }
 
-      // 2. Camera Clamping
+      // 2. Camera Tracking
       const cameraX = Math.max(0, Math.min(worldWidth - width, player.x - width / 2));
       const cameraY = Math.max(0, Math.min(worldHeight - height, player.y - height / 2));
 
@@ -304,279 +295,325 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
       ctx.save();
       ctx.translate(-cameraX, -cameraY);
 
-      // Base Cyber Floor Pattern
-      ctx.fillStyle = '#050b18';
+      // Deep Space Base Texture Floor
+      ctx.fillStyle = '#060b18';
       ctx.fillRect(0, 0, worldWidth, worldHeight);
 
-      // Grid Tiles
-      ctx.strokeStyle = 'rgba(0, 242, 254, 0.07)';
-      ctx.lineWidth = 1;
-      const gridSize = 48;
-      for (let x = 0; x <= worldWidth; x += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, worldHeight);
-        ctx.stroke();
-      }
-      for (let y = 0; y <= worldHeight; y += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(worldWidth, y);
-        ctx.stroke();
+      // Draw Tileset Base Map Floors & Pathways if loaded
+      if (baseMapImg.complete && baseMapImg.naturalWidth > 0) {
+        // Tile repeat background metal grid
+        const patternSize = 256;
+        for (let bx = 0; bx < worldWidth; bx += patternSize) {
+          for (let by = 0; by < worldHeight; by += patternSize) {
+            // Slicing top-left tile from baseMapImg (0, 0, 200, 200)
+            ctx.drawImage(baseMapImg, 0, 0, 200, 200, bx, by, patternSize, patternSize);
+          }
+        }
+      } else {
+        // Fallback sci-fi grid
+        ctx.strokeStyle = 'rgba(0, 242, 254, 0.12)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x <= worldWidth; x += 48) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, worldHeight);
+          ctx.stroke();
+        }
+        for (let y = 0; y <= worldHeight; y += 48) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(worldWidth, y);
+          ctx.stroke();
+        }
       }
 
-      // Main Energy Conduits / Pathways
-      ctx.strokeStyle = 'rgba(0, 242, 254, 0.35)';
-      ctx.lineWidth = 6;
+      // Main Illuminated Energy Conduits Connecting All Sectors
+      ctx.strokeStyle = 'rgba(0, 242, 254, 0.5)';
+      ctx.lineWidth = 8;
+      ctx.shadowColor = '#00f2fe';
+      ctx.shadowBlur = 12;
       ctx.beginPath();
-      // Center Crossroad
-      ctx.moveTo(650, 100);
-      ctx.lineTo(650, 1000);
-      ctx.moveTo(200, 550);
-      ctx.lineTo(1200, 550);
+      // Main Axes
+      ctx.moveTo(700, 80);
+      ctx.lineTo(700, 1120);
+      ctx.moveTo(120, 550);
+      ctx.lineTo(1380, 550);
       // Diagonals to Sector Zones
-      ctx.moveTo(650, 550);
-      ctx.lineTo(350, 350);
-      ctx.moveTo(650, 550);
-      ctx.lineTo(950, 320);
-      ctx.moveTo(650, 550);
-      ctx.lineTo(350, 750);
-      ctx.moveTo(650, 550);
-      ctx.lineTo(950, 750);
+      ctx.moveTo(700, 550);
+      ctx.lineTo(360, 360);
+      ctx.moveTo(700, 550);
+      ctx.lineTo(1040, 360);
+      ctx.moveTo(700, 550);
+      ctx.lineTo(360, 780);
+      ctx.moveTo(700, 550);
+      ctx.lineTo(1040, 780);
       ctx.stroke();
+      ctx.shadowBlur = 0;
 
-      // Glowing Center Nexus Hub
-      const nexusPulse = Math.sin(time * 0.003) * 10 + 40;
-      ctx.fillStyle = 'rgba(0, 242, 254, 0.15)';
+      // Central Nexus Hologram Hub
+      const nexusPulse = Math.sin(time * 0.003) * 8 + 36;
+      ctx.fillStyle = 'rgba(0, 242, 254, 0.2)';
       ctx.beginPath();
-      ctx.arc(650, 550, nexusPulse + 20, 0, Math.PI * 2);
+      ctx.arc(700, 550, nexusPulse + 25, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.strokeStyle = '#00f2fe';
       ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.arc(650, 550, 35, 0, Math.PI * 2);
+      ctx.arc(700, 550, 42, 0, Math.PI * 2);
       ctx.stroke();
 
-      // 5. Render Interactive Zones & Buildings
+      ctx.font = 'bold 11px "Orbitron"';
+      ctx.fillStyle = '#67e8f9';
+      ctx.textAlign = 'center';
+      ctx.fillText('NEXUS CORE', 700, 555);
+
+      // 5. Render Interactive Zones with Real Sprites & Buildings
       zones.forEach((z) => {
-        // Zone Aura
         const isHover = activeZone?.id === z.id;
-        const pulse = Math.sin(time * 0.004 + z.x) * 6;
-        ctx.fillStyle = isHover ? `${z.color}33` : `${z.color}15`;
+        const pulse = Math.sin(time * 0.004 + z.x) * 5;
+
+        // Glowing Platform Aura
+        ctx.fillStyle = isHover ? `${z.color}35` : `${z.color}15`;
         ctx.beginPath();
-        ctx.arc(z.x, z.y, z.radius * 0.75 + pulse, 0, Math.PI * 2);
+        ctx.arc(z.x, z.y, z.radius * 0.72 + pulse, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.strokeStyle = z.color;
-        ctx.lineWidth = isHover ? 3 : 1.5;
+        ctx.lineWidth = isHover ? 3.5 : 2;
+        ctx.shadowColor = z.color;
+        ctx.shadowBlur = isHover ? 16 : 8;
         ctx.beginPath();
-        ctx.arc(z.x, z.y, z.radius * 0.75, 0, Math.PI * 2);
+        ctx.arc(z.x, z.y, z.radius * 0.72, 0, Math.PI * 2);
         ctx.stroke();
+        ctx.shadowBlur = 0;
 
-        // Building / Sector Platform Graphics
+        // Specific Sector Sprites
         if (z.id === 'FARM') {
-          // Bio-Dome Farm Plots
-          ctx.fillStyle = '#064e3b';
-          for (let row = -1; row <= 1; row++) {
-            for (let col = -1; col <= 1; col++) {
-              const px = z.x + col * 32 - 14;
-              const py = z.y + row * 28 - 12;
-              ctx.fillRect(px, py, 28, 24);
-              ctx.strokeStyle = '#10b981';
-              ctx.strokeRect(px, py, 28, 24);
+          // 1. Bio-Dome Greenhouse & Live Crop Plots
+          if (baseMapImg.complete && baseMapImg.naturalWidth > 0) {
+            // Draw Bio-Dome building slice (bottom-left of baseMapImg: 0, 700, 360, 320)
+            ctx.drawImage(baseMapImg, 0, 700, 360, 320, z.x - 90, z.y - 120, 180, 160);
+          }
 
-              // Crop Sprout
-              ctx.fillStyle = '#34d399';
-              ctx.beginPath();
-              ctx.arc(px + 14, py + 12, 4 + (readyCropsCount > 0 ? 2 : 0), 0, Math.PI * 2);
-              ctx.fill();
-            }
+          // Draw Crop Plots & Animated Crops using tileset_crops_and_minerals.png
+          if (cropsImg.complete && cropsImg.naturalWidth > 0) {
+            // Draw 4 crop plots around the dome
+            const cropOffsets = [
+              { dx: -70, dy: 45, type: 'WHEAT', stage: readyCropsCount > 0 ? 3 : 1 },
+              { dx: -25, dy: 55, type: 'CORN', stage: 2 },
+              { dx: 25, dy: 55, type: 'BERRY', stage: readyCropsCount > 0 ? 3 : 2 },
+              { dx: 70, dy: 45, type: 'MELON', stage: readyCropsCount > 0 ? 3 : 1 },
+            ];
+
+            cropOffsets.forEach((c, idx) => {
+              // Crop spritesheet slicing
+              let sx = 100 + c.stage * 110;
+              let sy = 100 + idx * 110;
+              ctx.drawImage(cropsImg, sx, sy, 100, 100, z.x + c.dx - 22, z.y + c.dy - 22, 44, 44);
+            });
           }
         } else if (z.id === 'HANGAR') {
-          // Launch Pad Platform LP-01
-          ctx.fillStyle = '#0f172a';
-          ctx.fillRect(z.x - 50, z.y - 45, 100, 90);
-          ctx.strokeStyle = '#00f2fe';
-          ctx.strokeRect(z.x - 50, z.y - 45, 100, 90);
+          // 2. Launchpad LP-01 & Docked Starship
+          if (baseMapImg.complete && baseMapImg.naturalWidth > 0) {
+            // Slice Launch Pad from baseMapImg (bottom-right: 680, 680, 340, 340)
+            ctx.drawImage(baseMapImg, 680, 680, 340, 340, z.x - 95, z.y - 95, 190, 190);
+          }
 
-          // Render Docked Ship (Top-down)
-          ctx.fillStyle = '#00f2fe';
-          ctx.font = '36px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText('🛸', z.x, z.y);
+          // Draw Docked Starship using spritesheet_ships_r_to_ssr.png
+          if (shipsImg.complete && shipsImg.naturalWidth > 0) {
+            // Determine ship slice by profile tier
+            let shipSx = 150;
+            let shipSy = 100; // Tier R Scout
+            let shipSw = 220;
+            let shipSh = 220;
 
-          // Thruster Glow
-          ctx.fillStyle = 'rgba(239, 68, 68, 0.6)';
-          ctx.beginPath();
-          ctx.arc(z.x, z.y + 24, 8 + Math.sin(time * 0.01) * 3, 0, Math.PI * 2);
-          ctx.fill();
+            if (equippedShip && equippedShip.shipId.includes('NOVA')) {
+              // SSR Nova Hunter (Middle-bottom)
+              shipSx = 120;
+              shipSy = 550;
+              shipSw = 360;
+              shipSh = 220;
+            } else if (equippedShip && equippedShip.shipId.includes('PLASMA')) {
+              // SR Plasma Interceptor
+              shipSx = 100;
+              shipSy = 220;
+              shipSw = 280;
+              shipSh = 200;
+            }
+
+            // Draw Ship on Launchpad
+            ctx.save();
+            ctx.translate(z.x, z.y - 10);
+            ctx.rotate(-Math.PI / 2); // Point ship upward
+            ctx.drawImage(shipsImg, shipSx, shipSy, shipSw, shipSh, -45, -45, 90, 90);
+            ctx.restore();
+
+            // Animated Thruster Plasma Plume
+            const flamePulse = Math.sin(time * 0.02) * 5 + 14;
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.85)';
+            ctx.shadowColor = '#ef4444';
+            ctx.shadowBlur = 15;
+            ctx.beginPath();
+            ctx.arc(z.x, z.y + 35, flamePulse, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+          }
         } else if (z.id === 'MARKET') {
-          // Market Bazaar Stall
-          ctx.fillStyle = '#1e1b4b';
-          ctx.fillRect(z.x - 45, z.y - 40, 90, 80);
-          ctx.strokeStyle = '#f59e0b';
-          ctx.strokeRect(z.x - 45, z.y - 40, 90, 80);
+          // 3. Interstellar Market Bazaar & Crates
+          if (baseMapImg.complete && baseMapImg.naturalWidth > 0) {
+            // Slice Storage / Solar structure (620, 250, 340, 240)
+            ctx.drawImage(baseMapImg, 620, 250, 340, 240, z.x - 85, z.y - 85, 170, 120);
+          }
 
-          ctx.font = '36px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText('🏪', z.x, z.y);
+          // Draw Ore / Treasure Chest from crops & minerals sheet
+          if (cropsImg.complete && cropsImg.naturalWidth > 0) {
+            // Treasure chest slice (bottom-right: 640, 750, 180, 180)
+            ctx.drawImage(cropsImg, 640, 750, 180, 180, z.x - 25, z.y + 20, 50, 50);
+          }
         } else if (z.id === 'GACHA') {
-          // Swirling Quantum Portal
+          // 4. Swirling Quantum Warp Gate
+          if (baseMapImg.complete && baseMapImg.naturalWidth > 0) {
+            // Slice Warp Gate from baseMapImg (bottom-middle: 380, 740, 280, 280)
+            ctx.drawImage(baseMapImg, 380, 740, 280, 280, z.x - 80, z.y - 80, 160, 160);
+          }
+
+          // Animated Swirling Energy Vortex
           ctx.save();
           ctx.translate(z.x, z.y);
-          ctx.rotate(time * 0.002);
+          ctx.rotate(time * 0.003);
           ctx.strokeStyle = '#a855f7';
-          ctx.lineWidth = 3;
+          ctx.lineWidth = 4;
+          ctx.shadowColor = '#a855f7';
+          ctx.shadowBlur = 18;
           ctx.beginPath();
-          ctx.arc(0, 0, 32, 0, Math.PI * 1.5);
+          ctx.arc(0, 0, 36, 0, Math.PI * 1.6);
           ctx.stroke();
 
-          ctx.strokeStyle = '#ec4899';
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 2.5;
           ctx.beginPath();
-          ctx.arc(0, 0, 22, 0, Math.PI * 1.2);
+          ctx.arc(0, 0, 24, 0, Math.PI * 1.3);
           ctx.stroke();
+          ctx.shadowBlur = 0;
           ctx.restore();
-
-          ctx.font = '32px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText('🌌', z.x, z.y);
         } else if (z.id === 'BATTLE') {
-          // Strike Radar Tower
-          ctx.font = '36px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText('⚔️', z.x, z.y);
+          // 5. Strike Defense Radar & Solar Battery Array
+          if (baseMapImg.complete && baseMapImg.naturalWidth > 0) {
+            ctx.drawImage(baseMapImg, 620, 100, 260, 140, z.x - 80, z.y - 70, 160, 90);
+          }
 
-          // Scanning Line
-          ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
-          ctx.lineWidth = 2;
+          // Radar Rotating Beam
+          const scanAngle = time * 0.0035;
+          ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)';
+          ctx.lineWidth = 2.5;
+          ctx.shadowColor = '#ef4444';
+          ctx.shadowBlur = 12;
           ctx.beginPath();
           ctx.moveTo(z.x, z.y);
-          const scanAngle = time * 0.003;
-          ctx.lineTo(z.x + Math.cos(scanAngle) * 45, z.y + Math.sin(scanAngle) * 45);
+          ctx.lineTo(z.x + Math.cos(scanAngle) * 55, z.y + Math.sin(scanAngle) * 55);
           ctx.stroke();
+          ctx.shadowBlur = 0;
         } else if (z.id === 'INVENTORY') {
-          ctx.font = '36px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText('📦', z.x, z.y);
+          // 6. Energy Minerals & Chest Vault
+          if (cropsImg.complete && cropsImg.naturalWidth > 0) {
+            // Draw Energy Crystal (bottom-left: 310, 750, 130, 130)
+            ctx.drawImage(cropsImg, 310, 750, 130, 130, z.x - 55, z.y - 30, 55, 55);
+            // Draw Stellar Gem (bottom-middle: 460, 750, 130, 130)
+            ctx.drawImage(cropsImg, 460, 750, 130, 130, z.x + 5, z.y - 30, 55, 55);
+          }
         }
 
         // Zone Name Label
         ctx.font = 'bold 12px "Orbitron", sans-serif';
         ctx.fillStyle = z.color;
         ctx.textAlign = 'center';
-        ctx.fillText(z.name, z.x, z.y + z.radius * 0.75 + 18);
+        ctx.fillText(z.name, z.x, z.y + z.radius * 0.72 + 20);
       });
 
-      // 6. Render NPCs
-      // NPC 1: Dr. Nova (Scientist)
-      ctx.font = '28px sans-serif';
-      ctx.fillText('👩‍🔬', 420, 380);
-      ctx.font = 'bold 10px "Orbitron"';
-      ctx.fillStyle = '#67e8f9';
-      ctx.fillText('TS. Nova', 420, 360);
+      // 6. Render NPCs from Spritesheet
+      if (charImg.complete && charImg.naturalWidth > 0) {
+        // NPC 1: Dr. Nova (Scientist) at Bio-Farm (Row 3, Col 0: 40, 510, 140, 170)
+        ctx.drawImage(charImg, 40, 510, 140, 170, 440, 390, 40, 48);
+        ctx.font = 'bold 10px "Orbitron"';
+        ctx.fillStyle = '#67e8f9';
+        ctx.textAlign = 'center';
+        ctx.fillText('TS. Nova 👩‍🔬', 460, 380);
 
-      // NPC 2: Mechanic Zara (Hangar)
-      ctx.font = '28px sans-serif';
-      ctx.fillText('👩‍🔧', 880, 340);
-      ctx.fillStyle = '#fde047';
-      ctx.fillText('Kỹ sư Zara', 880, 320);
+        // NPC 2: Mechanic Zara at Hangar (Row 3, Col 2: 370, 510, 140, 170)
+        ctx.drawImage(charImg, 370, 510, 140, 170, 960, 370, 40, 48);
+        ctx.fillStyle = '#fde047';
+        ctx.fillText('Kỹ sư Zara 👩‍🔧', 980, 360);
 
-      // NPC 3: Alien Merchant Jax (Market)
-      ctx.font = '28px sans-serif';
-      ctx.fillText('👽', 420, 780);
-      ctx.fillStyle = '#c084fc';
-      ctx.fillText('Thương nhân Jax', 420, 760);
+        // NPC 3: Alien Merchant Jax at Market (Row 3, Col 4: 700, 510, 140, 170)
+        ctx.drawImage(charImg, 700, 510, 140, 170, 440, 800, 42, 50);
+        ctx.fillStyle = '#c084fc';
+        ctx.fillText('Thương nhân Jax 👽', 460, 790);
 
-      // 7. Render Floating Drone Companion
-      const droneY = player.y - 30 + Math.sin(time * 0.005) * 6;
-      const droneX = player.x - 24;
-      ctx.fillStyle = '#00f2fe';
-      ctx.beginPath();
-      ctx.arc(droneX, droneY, 7, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      // Drone Eye
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(droneX + 2, droneY, 2.5, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Drone Thruster Particle
-      ctx.fillStyle = 'rgba(0, 242, 254, 0.5)';
-      ctx.beginPath();
-      ctx.arc(droneX, droneY + 8, 3 + Math.sin(time * 0.01) * 1.5, 0, Math.PI * 2);
-      ctx.fill();
-
-      // 8. Render Player Commander
-      // Player Shadow
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
-      ctx.beginPath();
-      ctx.ellipse(player.x, player.y + 14, 14, 6, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Player Body (High-Tech Suit with Visor Glow)
-      ctx.save();
-      ctx.translate(player.x, player.y);
-
-      // Suit Base
-      ctx.fillStyle = '#e2e8f0';
-      ctx.beginPath();
-      ctx.roundRect(-10, -18, 20, 30, 6);
-      ctx.fill();
-      ctx.strokeStyle = '#00f2fe';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      // Visor Glow (Cyan)
-      ctx.fillStyle = '#00f2fe';
-      ctx.beginPath();
-      ctx.ellipse(0, -10, 7, 4, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Armor Chest Light
-      ctx.fillStyle = '#10b981';
-      ctx.beginPath();
-      ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Walking Step Animation Legs
-      if (player.isMoving) {
-        const legOffset = Math.sin(player.animTimer * 2) * 4;
-        ctx.fillStyle = '#94a3b8';
-        ctx.fillRect(-8, 12, 6, 6 + legOffset);
-        ctx.fillRect(2, 12, 6, 6 - legOffset);
-      } else {
-        ctx.fillStyle = '#94a3b8';
-        ctx.fillRect(-8, 12, 6, 6);
-        ctx.fillRect(2, 12, 6, 6);
+        // NPC 4: Floating Drone Companion (Row 5: 40 + (frame%4)*170, 870, 140, 140)
+        const droneFrame = Math.floor(time * 0.006) % 4;
+        const droneX = player.x - 26;
+        const droneY = player.y - 32 + Math.sin(time * 0.005) * 6;
+        ctx.drawImage(charImg, 40 + droneFrame * 170, 870, 140, 140, droneX - 16, droneY - 16, 32, 32);
       }
 
-      ctx.restore();
-
-      // Player Name Overhead
-      ctx.font = 'bold 11px "Orbitron", sans-serif';
-      ctx.fillStyle = '#ffffff';
-      ctx.textAlign = 'center';
-      ctx.fillText(profile.username, player.x, player.y - 26);
-
-      ctx.font = 'bold 9px "Orbitron", sans-serif';
-      ctx.fillStyle = '#fbbf24';
-      ctx.fillText(`Lv.${profile.level}`, player.x, player.y - 38);
-
-      // 9. Floating Ambient Spores & Star Dust
-      spores.forEach((s) => {
-        s.y -= s.speedY;
-        if (s.y < 0) s.y = worldHeight;
-        ctx.fillStyle = s.color;
-        ctx.globalAlpha = s.alpha * (Math.sin(time * 0.002 + s.x) * 0.3 + 0.7);
+      // 7. Render Player Commander from Spritesheet with 4-Direction Walk Frames
+      if (charImg.complete && charImg.naturalWidth > 0) {
+        // Player Shadow
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
         ctx.beginPath();
-        ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+        ctx.ellipse(player.x, player.y + 18, 16, 7, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Determine Spritesheet Row based on Direction
+        let rowY = 0; // DOWN
+        let colX = player.frame;
+
+        if (player.dir === 'LEFT' || player.dir === 'RIGHT') {
+          rowY = 170; // Side walk
+        } else if (player.dir === 'UP') {
+          rowY = 340; // Back walk
+        }
+
+        const srcX = 40 + (colX % 4) * 165;
+        const srcY = 20 + rowY;
+
+        ctx.save();
+        ctx.translate(player.x, player.y);
+
+        if (player.dir === 'LEFT') {
+          ctx.scale(-1, 1); // Flip horizontally for LEFT
+        }
+
+        // Draw Player Sprite Frame (48x56 px)
+        ctx.drawImage(charImg, srcX, srcY, 140, 160, -24, -36, 48, 56);
+        ctx.restore();
+
+        // Player Name & Level Overhead
+        ctx.font = 'bold 11px "Orbitron", sans-serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.fillText(profile.username, player.x, player.y - 44);
+
+        ctx.font = 'bold 9px "Orbitron", sans-serif';
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillText(`Lv.${profile.level}`, player.x, player.y - 56);
+      } else {
+        // Fallback Vector Player
+        ctx.fillStyle = '#e2e8f0';
+        ctx.beginPath();
+        ctx.roundRect(player.x - 12, player.y - 20, 24, 36, 6);
+        ctx.fill();
+      }
+
+      // 8. Ambient Bio-Spores & Energy Particles
+      particles.forEach((p) => {
+        p.y -= p.speedY;
+        if (p.y < 0) p.y = worldHeight;
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.alpha * (Math.sin(time * 0.002 + p.x) * 0.3 + 0.7);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
       });
       ctx.globalAlpha = 1;
@@ -705,17 +742,14 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
           <span className="text-emerald-400 animate-pulse">●</span>
         </div>
         <div className="w-36 h-28 bg-[#040816] rounded-xl relative border border-cyan-500/30 overflow-hidden">
-          {/* Radar Sweep Line */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500/10 to-transparent animate-radar-sweep pointer-events-none" />
-
           {/* Zones on MiniMap */}
           {zones.map((z) => (
             <div
               key={z.id}
               className="absolute w-2.5 h-2.5 rounded-full transform -translate-x-1/2 -translate-y-1/2"
               style={{
-                left: `${(z.x / 1400) * 100}%`,
-                top: `${(z.y / 1100) * 100}%`,
+                left: `${(z.x / 1500) * 100}%`,
+                top: `${(z.y / 1200) * 100}%`,
                 backgroundColor: z.color,
               }}
               title={z.name}
@@ -726,15 +760,15 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
           <div
             className="absolute w-3 h-3 rounded-full bg-white border border-cyan-400 animate-ping transform -translate-x-1/2 -translate-y-1/2"
             style={{
-              left: `${(playerPos.x / 1400) * 100}%`,
-              top: `${(playerPos.y / 1100) * 100}%`,
+              left: `${(playerPos.x / 1500) * 100}%`,
+              top: `${(playerPos.y / 1200) * 100}%`,
             }}
           />
           <div
             className="absolute w-2 h-2 rounded-full bg-cyan-400 transform -translate-x-1/2 -translate-y-1/2"
             style={{
-              left: `${(playerPos.x / 1400) * 100}%`,
-              top: `${(playerPos.y / 1100) * 100}%`,
+              left: `${(playerPos.x / 1500) * 100}%`,
+              top: `${(playerPos.y / 1200) * 100}%`,
             }}
           />
         </div>
