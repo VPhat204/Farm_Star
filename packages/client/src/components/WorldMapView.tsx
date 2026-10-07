@@ -277,12 +277,14 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
       player.x = Math.max(80, Math.min(worldWidth - 80, player.x));
       player.y = Math.max(80, Math.min(worldHeight - 80, player.y));
 
-      // Walk Animation Step
+      // Walk & Idle Animation Step
       if (player.isMoving) {
-        player.animTimer += dt * 8;
-        player.frame = Math.floor(player.animTimer) % 3;
+        player.animTimer += dt * 7;
+        const walkCycle = [1, 0, 2, 0];
+        player.frame = walkCycle[Math.floor(player.animTimer) % walkCycle.length];
       } else {
         player.frame = 0;
+        player.animTimer = 0;
       }
 
       // Sync HUD coordinates every 150ms to keep React light
@@ -561,56 +563,97 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
         ctx.fillText(z.name, z.x, z.y + z.radius * 0.75 + 20);
       });
 
-      // 6. Render NPCs
+      // 6. Render NPCs with Gentle Idle Breathing
       if (charImg.complete && charImg.naturalWidth > 0) {
         // Dr. Nova at Farm (Row 3, Col 0: 40, 510, 140, 170)
-        ctx.drawImage(charImg, 40, 510, 140, 170, 430, 390, 42, 50);
+        const novaBreath = Math.sin(time * 0.003) * 1.5;
+        ctx.drawImage(charImg, 40, 510, 140, 170, 430, 390 + novaBreath, 42, 50);
         ctx.font = 'bold 10px "Orbitron"';
         ctx.fillStyle = '#67e8f9';
-        ctx.fillText('TS. Nova 👩‍🔬', 450, 380);
+        ctx.fillText('TS. Nova 👩‍🔬', 450, 380 + novaBreath);
 
         // Mechanic Zara at Hangar (Row 3, Col 2: 370, 510, 140, 170)
-        ctx.drawImage(charImg, 370, 510, 140, 170, 1070, 380, 42, 50);
+        const zaraBreath = Math.sin(time * 0.0032 + 1) * 1.5;
+        ctx.drawImage(charImg, 370, 510, 140, 170, 1070, 380 + zaraBreath, 42, 50);
         ctx.fillStyle = '#fde047';
-        ctx.fillText('Kỹ sư Zara 👩‍🔧', 1090, 370);
+        ctx.fillText('Kỹ sư Zara 👩‍🔧', 1090, 370 + zaraBreath);
 
         // Alien Merchant Jax at Market (Row 3, Col 4: 700, 510, 140, 170)
-        ctx.drawImage(charImg, 700, 510, 140, 170, 430, 880, 44, 52);
+        const jaxBreath = Math.sin(time * 0.0028 + 2) * 1.5;
+        ctx.drawImage(charImg, 700, 510, 140, 170, 430, 880 + jaxBreath, 44, 52);
         ctx.fillStyle = '#c084fc';
-        ctx.fillText('Thương nhân Jax 👽', 450, 870);
+        ctx.fillText('Thương nhân Jax 👽', 450, 870 + jaxBreath);
 
-        // Floating Drone Companion
+        // Orbiting Drone Companion
+        const droneAngle = time * 0.0022;
+        const droneOrbitRx = player.isMoving ? 30 : 36;
+        const droneOrbitRy = player.isMoving ? 12 : 16;
+        const droneX = player.x + Math.cos(droneAngle) * droneOrbitRx;
+        const droneY = player.y - 36 + Math.sin(droneAngle) * droneOrbitRy + Math.sin(time * 0.006) * 4;
         const droneFrame = Math.floor(time * 0.006) % 4;
-        const droneX = player.x - 26;
-        const droneY = player.y - 32 + Math.sin(time * 0.005) * 6;
+
+        // Drone micro ground shadow
+        ctx.fillStyle = 'rgba(0, 242, 254, 0.25)';
+        ctx.beginPath();
+        ctx.ellipse(droneX, player.y + 18, 9, 4, 0, 0, Math.PI * 2);
+        ctx.fill();
+
         ctx.drawImage(charImg, 40 + droneFrame * 170, 870, 140, 140, droneX - 16, droneY - 16, 32, 32);
       }
 
-      // 7. Render Player Character
+      // 7. Render Player Character with Dynamic Idle Breathing & Stance
       if (charImg.complete && charImg.naturalWidth > 0) {
-        // Player Shadow
+        // Dynamic Idle Breathing & Walk Bobbing Calculations
+        const idleBreath = Math.sin(time * 0.0035) * 1.8;
+        const walkBob = Math.abs(Math.sin(player.animTimer * Math.PI)) * 2.4;
+        const effectiveY = player.isMoving ? (player.y - walkBob) : (player.y + idleBreath);
+
+        const scaleY = player.isMoving
+          ? 1.0 + Math.abs(Math.sin(player.animTimer * Math.PI)) * 0.035
+          : 1.0 + Math.sin(time * 0.0035) * 0.025;
+        const scaleX = player.isMoving
+          ? 1.0 - Math.abs(Math.sin(player.animTimer * Math.PI)) * 0.02
+          : 1.0 - Math.sin(time * 0.0035) * 0.015;
+
+        // Ground Contact Shadow (Synchronized with breathing & footsteps)
+        const shadowRx = player.isMoving ? 16 + Math.sin(player.animTimer * Math.PI) * 1.5 : 16 - Math.sin(time * 0.0035) * 1.2;
+        const shadowRy = 7;
         ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
         ctx.beginPath();
-        ctx.ellipse(player.x, player.y + 18, 16, 7, 0, 0, Math.PI * 2);
+        ctx.ellipse(player.x, player.y + 18, shadowRx, shadowRy, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        let rowY = 0; // DOWN
-        let colX = player.frame;
+        // Sci-Fi Gravitational Energy Ring under feet during Idle
+        if (!player.isMoving) {
+          const gravAlpha = 0.25 + Math.sin(time * 0.004) * 0.15;
+          ctx.strokeStyle = `rgba(0, 242, 254, ${gravAlpha})`;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.ellipse(player.x, player.y + 18, shadowRx + 5, shadowRy + 2.5, 0, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        // Determine Spritesheet Row & Column based on direction and frame
+        let rowY = 20; // DOWN
+        const colX = player.frame;
 
         if (player.dir === 'LEFT' || player.dir === 'RIGHT') {
-          rowY = 170; // Side
+          rowY = 190; // Side
         } else if (player.dir === 'UP') {
-          rowY = 340; // Back
+          rowY = 360; // Back
         }
 
         const srcX = 40 + (colX % 4) * 165;
-        const srcY = 20 + rowY;
+        const srcY = rowY;
 
         ctx.save();
-        ctx.translate(player.x, player.y);
+        ctx.translate(player.x, effectiveY);
 
+        // Flip horizontally for LEFT direction
         if (player.dir === 'LEFT') {
-          ctx.scale(-1, 1);
+          ctx.scale(-scaleX, scaleY);
+        } else {
+          ctx.scale(scaleX, scaleY);
         }
 
         ctx.drawImage(charImg, srcX, srcY, 140, 160, -24, -36, 48, 56);
@@ -620,11 +663,11 @@ export const WorldMapView: React.FC<WorldMapViewProps> = ({
         ctx.font = 'bold 11px "Orbitron", sans-serif';
         ctx.fillStyle = '#ffffff';
         ctx.textAlign = 'center';
-        ctx.fillText(profileRef.current.username, player.x, player.y - 44);
+        ctx.fillText(profileRef.current.username, player.x, effectiveY - 44);
 
         ctx.font = 'bold 9px "Orbitron", sans-serif';
         ctx.fillStyle = '#fbbf24';
-        ctx.fillText(`Lv.${profileRef.current.level}`, player.x, player.y - 56);
+        ctx.fillText(`Lv.${profileRef.current.level}`, player.x, effectiveY - 56);
       }
 
       // 8. Ambient Bio-Spores & Energy Particles
