@@ -1,0 +1,21 @@
+{
+  "name": "starfarm",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"cyan,magenta\" \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "npm run dev --workspace=@starfarm/server",
+    "dev:client": "npm run dev --workspace=@starfarm/client",
+    "build": "npm run build --workspaces",
+    "prisma:generate": "npm run prisma:generate --workspace=@starfarm/server",
+    "prisma:push": "npm run prisma:push --workspace=@starfarm/server",
+    "prisma:seed": "npm run prisma:seed --workspace=@starfarm/server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "typescript": "^5.8.2"
+  }
+}

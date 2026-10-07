@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Player {
+  id           Int              @id @default(autoincrement())
+  username     String           @unique
+  level        Int              @default(1)
+  exp          Int              @default(0)
+  credits      Int              @default(500)
+  stellarGems  Int              @default(200)
+  energy       Int              @default(100)
+  maxEnergy    Int              @default(100)
+  planetLevel  Int              @default(1)
+  pityCount    Int              @default(0)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  farmPlots    FarmPlot[]
+  ships        PlayerShip[]
+  inventory    InventoryItem[]
+  gachaHistory GachaHistory[]
+}
+
+model FarmPlot {
+  id         Int       @id @default(autoincrement())
+  playerId   Int
+  plotIndex  Int
+  cropType   String?
+  plantedAt  DateTime?
+  readyAt    DateTime?
+  status     String    @default("EMPTY") // EMPTY, GROWING, READY
+
+  player     Player    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, plotIndex])
+}
+
+model PlayerShip {
+  id         Int      @id @default(autoincrement())
+  playerId   Int
+  shipId     String   // e.g. SHIP_SCOUT_01, SHIP_NOVA_HUNTER
+  level      Int      @default(1)
+  exp        Int      @default(0)
+  star       Int      @default(1)
+  isEquipped Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  player     Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
+
+model InventoryItem {
+  id        Int      @id @default(autoincrement())
+  playerId  Int
+  itemId    String   // WHEAT, ENERGY_CORN, IRON, BLUEPRINT_NOVA_HUNTER
+  quantity  Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, itemId])
+}
+
+model GachaHistory {
+  id        Int      @id @default(autoincrement())
+  playerId  Int
+  shipId    String
+  rarity    String
+  isNew     Boolean
+  createdAt DateTime @default(now())
+
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
