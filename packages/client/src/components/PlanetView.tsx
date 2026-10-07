@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PlayerProfile, CROPS, SHIPS } from '@starfarm/shared';
 import { StarFarmLogo } from './StarFarmLogo';
+import { PlanetScene3D } from './PlanetScene3D';
 import {
   Sprout,
   Rocket,
@@ -16,7 +17,9 @@ import {
   Clock,
   ArrowRight,
   Shield,
-  HelpCircle
+  HelpCircle,
+  Globe2,
+  LayoutGrid
 } from 'lucide-react';
 
 interface PlanetViewProps {
@@ -39,7 +42,7 @@ export const PlanetView: React.FC<PlanetViewProps> = ({
   onStartBattle,
 }) => {
   const [activeTab, setActiveTab] = useState<'HOME' | 'FARM' | 'FACTORY' | 'HANGAR' | 'GACHA' | 'SHOP'>('HOME');
-  const [activeNoticeAction, setActiveNoticeAction] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'3D' | 'GRID'>('3D');
 
   const equippedShip = profile.ships.find((s) => s.isEquipped) || profile.ships[0];
   const readyCropsCount = profile.farmPlots.filter((p) => p.status === 'READY').length;
@@ -70,31 +73,75 @@ export const PlanetView: React.FC<PlanetViewProps> = ({
           </div>
         </div>
 
-        {/* Equipped Ship Quick Card */}
-        {equippedShip && shipConfig && (
-          <div
-            onClick={onOpenHangar}
-            className="flex items-center gap-3 bg-space-950/80 px-4 py-2.5 rounded-xl border border-indigo-500/30 hover:border-cyan-400 cursor-pointer transition glow-cyan-sm"
-          >
-            <div className="w-10 h-10 rounded-lg bg-indigo-950/80 border border-indigo-400/40 flex items-center justify-center text-2xl animate-float">
-              🛸
-            </div>
-            <div>
-              <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-                Chiến Cơ Xuất Kích
-              </div>
-              <div className="font-['Orbitron'] font-bold text-xs text-cyan-300">
-                {shipConfig.name} <span className="text-amber-400">(Lv.{equippedShip.level})</span>
-              </div>
-            </div>
+        <div className="flex items-center gap-3">
+          {/* Mode Switcher 3D / 2D */}
+          <div className="flex items-center bg-[#070e24] p-1 rounded-2xl border border-cyan-500/30">
+            <button
+              onClick={() => setViewMode('3D')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-['Orbitron'] font-bold text-xs transition cursor-pointer ${
+                viewMode === '3D'
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow glow-cyan-sm'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              <Globe2 className="w-3.5 h-3.5" />
+              <span>Hành Tinh 3D</span>
+            </button>
+            <button
+              onClick={() => setViewMode('GRID')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-['Orbitron'] font-bold text-xs transition cursor-pointer ${
+                viewMode === 'GRID'
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow glow-cyan-sm'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Lưới 2D</span>
+            </button>
           </div>
-        )}
+
+          {/* Equipped Ship Quick Card */}
+          {equippedShip && shipConfig && (
+            <div
+              onClick={onOpenHangar}
+              className="flex items-center gap-3 bg-space-950/80 px-4 py-2 rounded-xl border border-indigo-500/30 hover:border-cyan-400 cursor-pointer transition glow-cyan-sm"
+            >
+              <div className="w-9 h-9 rounded-lg bg-indigo-950/80 border border-indigo-400/40 flex items-center justify-center text-xl animate-float">
+                🛸
+              </div>
+              <div className="hidden sm:block text-left">
+                <div className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">
+                  Chiến Cơ
+                </div>
+                <div className="font-['Orbitron'] font-bold text-xs text-cyan-300">
+                  {shipConfig.name} <span className="text-amber-400">(Lv.{equippedShip.level})</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* 2. Middle Row: Dialogue Box + Activity Notice + Gacha Pod Mini Widget */}
+      {/* 2. Main Center Body: 3D Scene OR 2D Facility Grid */}
+      {viewMode === '3D' ? (
+        <div className="space-y-6 animate-fade-in">
+          {/* Interactive 3D Planet Scene */}
+          <PlanetScene3D
+            profile={profile}
+            onOpenFarm={onOpenFarm}
+            onOpenHangar={onOpenHangar}
+            onOpenMarket={onOpenMarket}
+            onOpenGacha={onOpenGacha}
+            onOpenInventory={onOpenInventory}
+            onStartBattle={onStartBattle}
+          />
+        </div>
+      ) : null}
+
+      {/* 3. Middle Row: Dialogue Box + Activity Notice + Gacha Pod Mini Widget */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         
-        {/* Dialogue Assistant Card (Mục 1 & 6) */}
+        {/* Dialogue Assistant Card */}
         <div className="glass-panel p-4 rounded-2xl border border-cyan-500/30 flex flex-col justify-between shadow-lg relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" />
           <div>
@@ -113,7 +160,7 @@ export const PlanetView: React.FC<PlanetViewProps> = ({
                 <div className="font-['Orbitron'] font-bold text-xs text-cyan-300">
                   CHỈ HUY & TRỢ LÝ DRONE
                 </div>
-                <div className="text-[10px] text-gray-400">Trạm chỉ huy Gaia</div>
+                <div className="text-[10px] text-gray-400">Trạm chỉ huy Gaia Prime</div>
               </div>
             </div>
 
@@ -128,7 +175,7 @@ export const PlanetView: React.FC<PlanetViewProps> = ({
           </div>
         </div>
 
-        {/* Activity / Notice Card (Mục 6) */}
+        {/* Activity / Notice Card */}
         <div className="glass-panel p-4 rounded-2xl border border-amber-500/30 flex flex-col justify-between shadow-lg">
           <div>
             <div className="flex items-center justify-between mb-2">
@@ -203,7 +250,7 @@ export const PlanetView: React.FC<PlanetViewProps> = ({
           </div>
         </div>
 
-        {/* Gacha & Pity System Card (Mục 6) */}
+        {/* Gacha & Pity System Card */}
         <div className="glass-panel-purple p-4 rounded-2xl border border-purple-500/40 flex flex-col justify-between shadow-lg glow-purple-sm">
           <div>
             <div className="flex items-center justify-between mb-3">
@@ -256,13 +303,13 @@ export const PlanetView: React.FC<PlanetViewProps> = ({
           <div className="mt-3 grid grid-cols-2 gap-2">
             <button
               onClick={onOpenGacha}
-              className="py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-['Orbitron'] font-bold text-[11px] hover:opacity-95 transition shadow glow-gold-sm"
+              className="py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-['Orbitron'] font-bold text-[11px] hover:opacity-95 transition shadow glow-gold-sm cursor-pointer"
             >
               Quay 1 Lần 💎
             </button>
             <button
               onClick={onOpenGacha}
-              className="py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-['Orbitron'] font-bold text-[11px] hover:opacity-95 transition shadow glow-purple-sm"
+              className="py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-['Orbitron'] font-bold text-[11px] hover:opacity-95 transition shadow glow-purple-sm cursor-pointer"
             >
               Quay 10 Lần 🚀
             </button>
@@ -271,172 +318,174 @@ export const PlanetView: React.FC<PlanetViewProps> = ({
 
       </div>
 
-      {/* 3. Building Facilities Grid (Mục 5 BUILDING PACK) */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🏙️</span>
-            <h3 className="font-['Orbitron'] font-bold text-sm text-cyan-300 tracking-wider">
-              CÔNG TRÌNH CĂN CỨ VŨ TRỤ (BUILDING PACK)
-            </h3>
+      {/* 4. Building Facilities Grid (Shown when in GRID mode or as overview) */}
+      {viewMode === 'GRID' && (
+        <div className="animate-fade-in">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🏙️</span>
+              <h3 className="font-['Orbitron'] font-bold text-sm text-cyan-300 tracking-wider">
+                CÔNG TRÌNH CĂN CỨ VŨ TRỤ (BUILDING PACK)
+              </h3>
+            </div>
+            <span className="text-xs text-gray-400">
+              Chạm vào công trình để kích hoạt tính năng
+            </span>
           </div>
-          <span className="text-xs text-gray-400">
-            Chạm vào công trình để kích hoạt tính năng
-          </span>
+
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-4">
+            
+            {/* 1. Ô Đất Trồng (Gaia Farm) */}
+            <div
+              onClick={onOpenFarm}
+              className="glass-panel p-4 rounded-2xl border border-emerald-500/30 hover:border-emerald-400 glow-emerald cursor-pointer transition-all duration-300 hover:scale-[1.02] group relative overflow-hidden flex flex-col justify-between min-h-[150px]"
+            >
+              <div className="absolute top-2.5 right-2.5">
+                {readyCropsCount > 0 ? (
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-400 text-black text-[10px] font-bold animate-bounce font-['Orbitron'] shadow">
+                    {readyCropsCount} Thu Hoạch!
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-gray-400 font-mono">{growingCropsCount} Đang Lớn</span>
+                )}
+              </div>
+              <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 w-fit group-hover:scale-110 transition glow-emerald">
+                <Sprout className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="font-['Orbitron'] font-bold text-sm text-white group-hover:text-emerald-300 transition">
+                  Ô ĐẤT TRỒNG
+                </h4>
+                <p className="text-[11px] text-gray-400 mt-0.5">Trồng Lúa Sao & Bắp Năng Lượng</p>
+              </div>
+            </div>
+
+            {/* 2. Nhà Chứa Tàu (Hangar) */}
+            <div
+              onClick={onOpenHangar}
+              className="glass-panel p-4 rounded-2xl border border-cyan-500/30 hover:border-cyan-400 glow-cyan cursor-pointer transition-all duration-300 hover:scale-[1.02] group relative overflow-hidden flex flex-col justify-between min-h-[150px]"
+            >
+              <div className="absolute top-2.5 right-2.5 text-[10px] text-cyan-300 font-mono font-bold">
+                {profile.ships.length} PHI THUYỀN
+              </div>
+              <div className="p-3 rounded-xl bg-cyan-500/10 text-cyan-400 w-fit group-hover:scale-110 transition glow-cyan">
+                <Rocket className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="font-['Orbitron'] font-bold text-sm text-white group-hover:text-cyan-300 transition">
+                  NHÀ CHỨA TÀU (HANGAR)
+                </h4>
+                <p className="text-[11px] text-gray-400 mt-0.5">Nâng cấp & trang bị chiến cơ</p>
+              </div>
+            </div>
+
+            {/* 3. Chợ Liên Hành Tinh (Market) */}
+            <div
+              onClick={onOpenMarket}
+              className="glass-panel p-4 rounded-2xl border border-amber-500/30 hover:border-amber-400 glow-gold cursor-pointer transition-all duration-300 hover:scale-[1.02] group relative overflow-hidden flex flex-col justify-between min-h-[150px]"
+            >
+              <div className="absolute top-2.5 right-2.5 text-[10px] text-amber-300 font-mono font-bold">
+                GIAO THƯƠNG
+              </div>
+              <div className="p-3 rounded-xl bg-amber-500/10 text-amber-400 w-fit group-hover:scale-110 transition glow-gold">
+                <Store className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="font-['Orbitron'] font-bold text-sm text-white group-hover:text-amber-300 transition">
+                  CHỢ LIÊN HÀNH TINH
+                </h4>
+                <p className="text-[11px] text-gray-400 mt-0.5">Bán nông sản & khoáng sản lấy Credits</p>
+              </div>
+            </div>
+
+            {/* 4. Kho Lưu Trữ (Inventory) */}
+            <div
+              onClick={onOpenInventory}
+              className="glass-panel p-4 rounded-2xl border border-indigo-500/30 hover:border-indigo-400 glow-purple cursor-pointer transition-all duration-300 hover:scale-[1.02] group relative overflow-hidden flex flex-col justify-between min-h-[150px]"
+            >
+              <div className="absolute top-2.5 right-2.5 text-[10px] text-indigo-300 font-mono font-bold">
+                {profile.inventory.filter((i) => i.quantity > 0).length} MÓN
+              </div>
+              <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 w-fit group-hover:scale-110 transition glow-purple">
+                <Package className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="font-['Orbitron'] font-bold text-sm text-white group-hover:text-indigo-300 transition">
+                  KHO LƯU TRỮ VẬT PHẨM
+                </h4>
+                <p className="text-[11px] text-gray-400 mt-0.5">Xem túi đồ & bản vẽ chế tạo</p>
+              </div>
+            </div>
+
+            {/* 5. Nhà Máy Chế Tạo (Factory) */}
+            <div
+              onClick={onOpenMarket}
+              className="glass-panel p-4 rounded-2xl border border-gray-700/60 hover:border-cyan-500/50 cursor-pointer transition-all duration-300 hover:scale-[1.02] group relative flex flex-col justify-between min-h-[150px]"
+            >
+              <div className="p-3 rounded-xl bg-space-800 text-gray-300 w-fit group-hover:text-cyan-400 transition">
+                <Factory className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="font-['Orbitron'] font-bold text-sm text-white group-hover:text-cyan-300 transition">
+                  NHÀ MÁY CHẾ TẠO
+                </h4>
+                <p className="text-[11px] text-gray-400 mt-0.5">Chế tạo phụ kiện & nhiên liệu</p>
+              </div>
+            </div>
+
+            {/* 6. Mỏ Khai Thác (Mine) */}
+            <div
+              onClick={onStartBattle}
+              className="glass-panel p-4 rounded-2xl border border-gray-700/60 hover:border-amber-500/50 cursor-pointer transition-all duration-300 hover:scale-[1.02] group relative flex flex-col justify-between min-h-[150px]"
+            >
+              <div className="p-3 rounded-xl bg-space-800 text-gray-300 w-fit group-hover:text-amber-400 transition">
+                <Pickaxe className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="font-['Orbitron'] font-bold text-sm text-white group-hover:text-amber-300 transition">
+                  MỎ KHAI THÁC
+                </h4>
+                <p className="text-[11px] text-gray-400 mt-0.5">Khai quật Quặng Sắt & Titanium</p>
+              </div>
+            </div>
+
+            {/* 7. Trạm Năng Lượng (Power Station) */}
+            <div
+              onClick={onStartBattle}
+              className="glass-panel p-4 rounded-2xl border border-gray-700/60 hover:border-emerald-500/50 cursor-pointer transition-all duration-300 hover:scale-[1.02] group relative flex flex-col justify-between min-h-[150px]"
+            >
+              <div className="p-3 rounded-xl bg-space-800 text-gray-300 w-fit group-hover:text-emerald-400 transition">
+                <Zap className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="font-['Orbitron'] font-bold text-sm text-white group-hover:text-emerald-300 transition">
+                  TRẠM NĂNG LƯỢNG
+                </h4>
+                <p className="text-[11px] text-gray-400 mt-0.5">Cung cấp năng lượng pin xuất kích</p>
+              </div>
+            </div>
+
+            {/* 8. Phòng Nghiên Cứu (Lab) */}
+            <div
+              onClick={onOpenHangar}
+              className="glass-panel p-4 rounded-2xl border border-gray-700/60 hover:border-purple-500/50 cursor-pointer transition-all duration-300 hover:scale-[1.02] group relative flex flex-col justify-between min-h-[150px]"
+            >
+              <div className="p-3 rounded-xl bg-space-800 text-gray-300 w-fit group-hover:text-purple-400 transition">
+                <FlaskConical className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="font-['Orbitron'] font-bold text-sm text-white group-hover:text-purple-300 transition">
+                  PHÒNG NGHIÊN CỨU
+                </h4>
+                <p className="text-[11px] text-gray-400 mt-0.5">Nâng cấp công nghệ & khiên bảo vệ</p>
+              </div>
+            </div>
+
+          </div>
         </div>
+      )}
 
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-4">
-          
-          {/* 1. Ô Đất Trồng (Gaia Farm) */}
-          <div
-            onClick={onOpenFarm}
-            className="glass-panel p-4 rounded-2xl border border-emerald-500/30 hover:border-emerald-400 glow-emerald cursor-pointer transition-all duration-300 hover:scale-[1.02] group relative overflow-hidden flex flex-col justify-between min-h-[150px]"
-          >
-            <div className="absolute top-2.5 right-2.5">
-              {readyCropsCount > 0 ? (
-                <span className="px-2 py-0.5 rounded-full bg-emerald-400 text-black text-[10px] font-bold animate-bounce font-['Orbitron'] shadow">
-                  {readyCropsCount} Thu Hoạch!
-                </span>
-              ) : (
-                <span className="text-[10px] text-gray-400 font-mono">{growingCropsCount} Đang Lớn</span>
-              )}
-            </div>
-            <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 w-fit group-hover:scale-110 transition glow-emerald">
-              <Sprout className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="font-['Orbitron'] font-bold text-sm text-white group-hover:text-emerald-300 transition">
-                Ô ĐẤT TRỒNG
-              </h4>
-              <p className="text-[11px] text-gray-400 mt-0.5">Trồng Lúa Sao & Bắp Năng Lượng</p>
-            </div>
-          </div>
-
-          {/* 2. Nhà Chứa Tàu (Hangar) */}
-          <div
-            onClick={onOpenHangar}
-            className="glass-panel p-4 rounded-2xl border border-cyan-500/30 hover:border-cyan-400 glow-cyan cursor-pointer transition-all duration-300 hover:scale-[1.02] group relative overflow-hidden flex flex-col justify-between min-h-[150px]"
-          >
-            <div className="absolute top-2.5 right-2.5 text-[10px] text-cyan-300 font-mono font-bold">
-              {profile.ships.length} PHI THUYỀN
-            </div>
-            <div className="p-3 rounded-xl bg-cyan-500/10 text-cyan-400 w-fit group-hover:scale-110 transition glow-cyan">
-              <Rocket className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="font-['Orbitron'] font-bold text-sm text-white group-hover:text-cyan-300 transition">
-                NHÀ CHỨA TÀU (HANGAR)
-              </h4>
-              <p className="text-[11px] text-gray-400 mt-0.5">Nâng cấp & trang bị chiến cơ</p>
-            </div>
-          </div>
-
-          {/* 3. Chợ Liên Hành Tinh (Market) */}
-          <div
-            onClick={onOpenMarket}
-            className="glass-panel p-4 rounded-2xl border border-amber-500/30 hover:border-amber-400 glow-gold cursor-pointer transition-all duration-300 hover:scale-[1.02] group relative overflow-hidden flex flex-col justify-between min-h-[150px]"
-          >
-            <div className="absolute top-2.5 right-2.5 text-[10px] text-amber-300 font-mono font-bold">
-              GIAO THƯƠNG
-            </div>
-            <div className="p-3 rounded-xl bg-amber-500/10 text-amber-400 w-fit group-hover:scale-110 transition glow-gold">
-              <Store className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="font-['Orbitron'] font-bold text-sm text-white group-hover:text-amber-300 transition">
-                CHỢ LIÊN HÀNH TINH
-              </h4>
-              <p className="text-[11px] text-gray-400 mt-0.5">Bán nông sản & khoáng sản lấy Credits</p>
-            </div>
-          </div>
-
-          {/* 4. Kho Lưu Trữ (Inventory) */}
-          <div
-            onClick={onOpenInventory}
-            className="glass-panel p-4 rounded-2xl border border-indigo-500/30 hover:border-indigo-400 glow-purple cursor-pointer transition-all duration-300 hover:scale-[1.02] group relative overflow-hidden flex flex-col justify-between min-h-[150px]"
-          >
-            <div className="absolute top-2.5 right-2.5 text-[10px] text-indigo-300 font-mono font-bold">
-              {profile.inventory.filter((i) => i.quantity > 0).length} MÓN
-            </div>
-            <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 w-fit group-hover:scale-110 transition glow-purple">
-              <Package className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="font-['Orbitron'] font-bold text-sm text-white group-hover:text-indigo-300 transition">
-                KHO LƯU TRỮ VẬT PHẨM
-              </h4>
-              <p className="text-[11px] text-gray-400 mt-0.5">Xem túi đồ & bản vẽ chế tạo</p>
-            </div>
-          </div>
-
-          {/* 5. Nhà Máy Chế Tạo (Factory) */}
-          <div
-            onClick={onOpenMarket}
-            className="glass-panel p-4 rounded-2xl border border-gray-700/60 hover:border-cyan-500/50 cursor-pointer transition-all duration-300 hover:scale-[1.02] group relative flex flex-col justify-between min-h-[150px]"
-          >
-            <div className="p-3 rounded-xl bg-space-800 text-gray-300 w-fit group-hover:text-cyan-400 transition">
-              <Factory className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="font-['Orbitron'] font-bold text-sm text-white group-hover:text-cyan-300 transition">
-                NHÀ MÁY CHẾ TẠO
-              </h4>
-              <p className="text-[11px] text-gray-400 mt-0.5">Chế tạo phụ kiện & nhiên liệu</p>
-            </div>
-          </div>
-
-          {/* 6. Mỏ Khai Thác (Mine) */}
-          <div
-            onClick={onStartBattle}
-            className="glass-panel p-4 rounded-2xl border border-gray-700/60 hover:border-amber-500/50 cursor-pointer transition-all duration-300 hover:scale-[1.02] group relative flex flex-col justify-between min-h-[150px]"
-          >
-            <div className="p-3 rounded-xl bg-space-800 text-gray-300 w-fit group-hover:text-amber-400 transition">
-              <Pickaxe className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="font-['Orbitron'] font-bold text-sm text-white group-hover:text-amber-300 transition">
-                MỎ KHAI THÁC
-              </h4>
-              <p className="text-[11px] text-gray-400 mt-0.5">Khai quật Quặng Sắt & Titanium</p>
-            </div>
-          </div>
-
-          {/* 7. Trạm Năng Lượng (Power Station) */}
-          <div
-            onClick={onStartBattle}
-            className="glass-panel p-4 rounded-2xl border border-gray-700/60 hover:border-emerald-500/50 cursor-pointer transition-all duration-300 hover:scale-[1.02] group relative flex flex-col justify-between min-h-[150px]"
-          >
-            <div className="p-3 rounded-xl bg-space-800 text-gray-300 w-fit group-hover:text-emerald-400 transition">
-              <Zap className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="font-['Orbitron'] font-bold text-sm text-white group-hover:text-emerald-300 transition">
-                TRẠM NĂNG LƯỢNG
-              </h4>
-              <p className="text-[11px] text-gray-400 mt-0.5">Cung cấp năng lượng pin xuất kích</p>
-            </div>
-          </div>
-
-          {/* 8. Phòng Nghiên Cứu (Lab) */}
-          <div
-            onClick={onOpenHangar}
-            className="glass-panel p-4 rounded-2xl border border-gray-700/60 hover:border-purple-500/50 cursor-pointer transition-all duration-300 hover:scale-[1.02] group relative flex flex-col justify-between min-h-[150px]"
-          >
-            <div className="p-3 rounded-xl bg-space-800 text-gray-300 w-fit group-hover:text-purple-400 transition">
-              <FlaskConical className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="font-['Orbitron'] font-bold text-sm text-white group-hover:text-purple-300 transition">
-                PHÒNG NGHIÊN CỨU
-              </h4>
-              <p className="text-[11px] text-gray-400 mt-0.5">Nâng cấp công nghệ & khiên bảo vệ</p>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      {/* 4. Big Action CTA: Xuất Kích Chiến Đấu */}
+      {/* 5. Big Action CTA: Xuất Kích Chiến Đấu */}
       <div className="text-center pt-2">
         <button
           onClick={onStartBattle}
@@ -450,13 +499,13 @@ export const PlanetView: React.FC<PlanetViewProps> = ({
         </p>
       </div>
 
-      {/* 5. Bottom Navigation Dock / Tabs (Mục 6 UI Pack) */}
+      {/* 6. Bottom Navigation Dock / Tabs */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#080d1e]/90 backdrop-blur-xl border-t border-cyan-500/25 px-2 py-2 shadow-2xl">
         <div className="max-w-xl mx-auto flex items-center justify-around">
           
           <button
             onClick={() => setActiveTab('HOME')}
-            className={`flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition ${
+            className={`flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition cursor-pointer ${
               activeTab === 'HOME' ? 'text-cyan-300 font-bold glow-cyan-sm' : 'text-gray-400 hover:text-white'
             }`}
           >
@@ -469,7 +518,7 @@ export const PlanetView: React.FC<PlanetViewProps> = ({
               setActiveTab('FARM');
               onOpenFarm();
             }}
-            className={`flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition relative ${
+            className={`flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition relative cursor-pointer ${
               activeTab === 'FARM' ? 'text-emerald-400 font-bold' : 'text-gray-400 hover:text-white'
             }`}
           >
@@ -485,7 +534,7 @@ export const PlanetView: React.FC<PlanetViewProps> = ({
               setActiveTab('FACTORY');
               onOpenMarket();
             }}
-            className={`flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition ${
+            className={`flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition cursor-pointer ${
               activeTab === 'FACTORY' ? 'text-amber-400 font-bold' : 'text-gray-400 hover:text-white'
             }`}
           >
@@ -498,7 +547,7 @@ export const PlanetView: React.FC<PlanetViewProps> = ({
               setActiveTab('HANGAR');
               onOpenHangar();
             }}
-            className={`flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition ${
+            className={`flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition cursor-pointer ${
               activeTab === 'HANGAR' ? 'text-cyan-400 font-bold' : 'text-gray-400 hover:text-white'
             }`}
           >
@@ -511,7 +560,7 @@ export const PlanetView: React.FC<PlanetViewProps> = ({
               setActiveTab('GACHA');
               onOpenGacha();
             }}
-            className={`flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition ${
+            className={`flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition cursor-pointer ${
               activeTab === 'GACHA' ? 'text-purple-400 font-bold' : 'text-gray-400 hover:text-white'
             }`}
           >
@@ -524,7 +573,7 @@ export const PlanetView: React.FC<PlanetViewProps> = ({
               setActiveTab('SHOP');
               onOpenMarket();
             }}
-            className={`flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition ${
+            className={`flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition cursor-pointer ${
               activeTab === 'SHOP' ? 'text-yellow-400 font-bold' : 'text-gray-400 hover:text-white'
             }`}
           >
