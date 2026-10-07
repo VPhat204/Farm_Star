@@ -11,22 +11,22 @@ interface TitleScreenProps {
 
 export const TitleScreen: React.FC<TitleScreenProps> = ({ profile, onStartGame, onOpenSettings }) => {
   return (
-    <div className="relative w-screen h-screen overflow-hidden select-none text-white flex flex-col justify-between p-6 sm:p-10 bg-[#030714]">
+    <div className="relative w-screen h-screen overflow-hidden select-none text-white flex flex-col justify-between p-6 sm:p-10">
       
       {/* 1. Full-Screen Cinematic 3D Planet & Space Scene Background */}
       <TitleScene3D />
 
       {/* 2. Top Header Bar */}
-      <div className="w-full max-w-7xl mx-auto flex items-center justify-between z-20">
+      <div className="relative z-10 w-full max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2.5 bg-[#081026]/80 backdrop-blur-xl px-4 py-2 rounded-2xl border border-cyan-400/40 shadow-2xl glow-cyan-sm">
+          <div className="flex items-center gap-2.5 bg-[#081026]/75 backdrop-blur-xl px-4 py-2 rounded-2xl border border-cyan-400/40 shadow-2xl glow-cyan-sm">
             <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />
             <span className="font-['Orbitron'] font-bold text-xs tracking-wider text-cyan-200">
               TRẠM GAIA PRIME: <strong className="text-emerald-400">ONLINE 🟢</strong>
             </span>
           </div>
 
-          <div className="hidden sm:flex items-center gap-2 bg-[#081026]/65 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-cyan-500/20 text-[11px] text-cyan-300 font-mono">
+          <div className="hidden sm:flex items-center gap-2 bg-[#081026]/60 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-cyan-500/20 text-[11px] text-cyan-300 font-mono">
             <Orbit className="w-3.5 h-3.5 text-cyan-400" />
             <span>TỌA ĐỘ VŨ TRỤ: SECTOR-07</span>
           </div>
@@ -34,7 +34,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({ profile, onStartGame, 
 
         <button
           onClick={onOpenSettings}
-          className="p-3 rounded-2xl bg-[#081026]/80 border border-cyan-400/40 hover:border-cyan-300 text-cyan-200 hover:text-white transition backdrop-blur-xl shadow-2xl glow-cyan-sm hover:scale-105 active:scale-95 cursor-pointer"
+          className="p-3 rounded-2xl bg-[#081026]/75 border border-cyan-400/40 hover:border-cyan-300 text-cyan-200 hover:text-white transition backdrop-blur-xl shadow-2xl glow-cyan-sm hover:scale-105 active:scale-95 cursor-pointer"
           title="Cài đặt hệ thống"
         >
           <Volume2 className="w-4 h-4" />
@@ -42,7 +42,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({ profile, onStartGame, 
       </div>
 
       {/* 3. Center Main Hero Title & Start Action */}
-      <div className="flex-1 max-w-7xl w-full mx-auto flex flex-col justify-center items-center text-center z-20 my-auto py-4">
+      <div className="relative z-10 flex-1 max-w-7xl w-full mx-auto flex flex-col justify-center items-center text-center my-auto py-4 pointer-events-auto">
         
         {/* Emblem & Logo Icon */}
         <div className="relative mb-3 flex items-center justify-center animate-float">
@@ -67,12 +67,12 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({ profile, onStartGame, 
         </div>
 
         {/* Sci-Fi Slogan */}
-        <p className="text-xs sm:text-sm font-bold tracking-widest text-cyan-100 uppercase bg-[#081026]/75 backdrop-blur-md px-5 py-1.5 rounded-full border border-cyan-500/30 my-4 shadow-lg">
+        <p className="text-xs sm:text-sm font-bold tracking-widest text-cyan-100 uppercase bg-[#081026]/70 backdrop-blur-md px-5 py-1.5 rounded-full border border-cyan-500/30 my-4 shadow-lg">
           Nông Trại Sinh Học Không Gian • Hạm Đội Chiến Cơ Ngân Hà
         </p>
 
         {/* Commander Status Card */}
-        <div className="mb-6 px-7 py-3 rounded-2xl bg-[#081026]/85 border border-cyan-400/50 backdrop-blur-2xl shadow-2xl flex items-center gap-5 sm:gap-7 glow-cyan-sm">
+        <div className="mb-6 px-7 py-3 rounded-2xl bg-[#081026]/80 border border-cyan-400/50 backdrop-blur-2xl shadow-2xl flex items-center gap-5 sm:gap-7 glow-cyan-sm">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 p-0.5 flex items-center justify-center text-xl shadow">
               🧑‍🚀
@@ -117,7 +117,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({ profile, onStartGame, 
       </div>
 
       {/* Bottom Spacer */}
-      <div className="h-2" />
+      <div className="relative z-10 h-2" />
 
     </div>
   );
