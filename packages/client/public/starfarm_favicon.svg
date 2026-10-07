@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <!-- Glow Filters -->
+    <filter id="glow-cyan" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    
+    <!-- Gradients -->
+    <linearGradient id="ring-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="50%" stop-color="#d97706" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+
+    <linearGradient id="crystal-emerald" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6ee7b7" />
+      <stop offset="50%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+
+    <radialGradient id="space-bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#081b33" />
+      <stop offset="100%" stop-color="#020712" />
+    </radialGradient>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="64" height="64" rx="16" fill="url(#space-bg)" stroke="#00f2fe" stroke-width="1.5" stroke-opacity="0.6"/>
+
+  <!-- Cybernetic Outer Ring -->
+  <circle cx="32" cy="32" r="23" fill="none" stroke="url(#ring-gold)" stroke-width="2.5" />
+  <circle cx="32" cy="32" r="20" fill="none" stroke="#00f2fe" stroke-width="1" stroke-dasharray="4 2" />
+
+  <!-- Orbital Energy Loop -->
+  <ellipse cx="32" cy="32" rx="26" ry="9" fill="none" stroke="#00f2fe" stroke-width="1.2" transform="rotate(-25 32 32)" filter="url(#glow-cyan)"/>
+
+  <!-- Bio-Crystal Sprout Core -->
+  <!-- Center Main Crystal -->
+  <polygon points="32,15 36,25 34,37 30,37 28,25" fill="url(#crystal-emerald)" filter="url(#glow-cyan)"/>
+  <line x1="32" y1="15" x2="32" y2="37" stroke="#a7f3d0" stroke-width="0.8" opacity="0.8"/>
+
+  <!-- Left Leaf Crystal -->
+  <polygon points="23,26 30,29 27,36 19,32" fill="#10b981" />
+  <line x1="23" y1="26" x2="27" y2="36" stroke="#a7f3d0" stroke-width="0.6" opacity="0.7"/>
+
+  <!-- Right Leaf Crystal -->
+  <polygon points="41,26 45,32 37,36 34,29" fill="#10b981" />
+  <line x1="41" y1="26" x2="37" y2="36" stroke="#a7f3d0" stroke-width="0.6" opacity="0.7"/>
+
+  <!-- Sprout Stem Base & Platform -->
+  <path d="M 32 37 Q 32 44 32 46" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"/>
+  <ellipse cx="32" cy="47" rx="8" ry="2.5" fill="#0f172a" stroke="#00f2fe" stroke-width="1"/>
+  <ellipse cx="32" cy="47" rx="4" ry="1.2" fill="#10b981" filter="url(#glow-cyan)"/>
+
+  <!-- Sparkling Stars -->
+  <circle cx="16" cy="18" r="1" fill="#ffffff" filter="url(#glow-cyan)"/>
+  <circle cx="48" cy="18" r="1.2" fill="#fde047" filter="url(#glow-cyan)"/>
+  <circle cx="47" cy="46" r="0.8" fill="#00f2fe" />
+</svg>

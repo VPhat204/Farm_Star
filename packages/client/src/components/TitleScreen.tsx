@@ -44,13 +44,19 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({ profile, onStartGame, 
       {/* 3. Center Main Hero Title & Start Action */}
       <div className="relative z-10 flex-1 max-w-7xl w-full mx-auto flex flex-col justify-center items-center text-center my-auto py-4 pointer-events-auto">
         
-        {/* Emblem & Logo Icon */}
-        <div className="relative mb-3 flex items-center justify-center animate-float">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-tr from-cyan-500 via-emerald-500 to-indigo-600 p-1 shadow-[0_0_50px_rgba(0,242,254,0.6)] glow-cyan flex items-center justify-center relative">
-            <div className="w-full h-full rounded-[22px] bg-[#070e24]/90 flex items-center justify-center text-4xl sm:text-5xl relative overflow-hidden border border-cyan-400/40">
-              <span className="filter drop-shadow">🌱</span>
-              <span className="absolute -top-1 -right-1 text-sm sm:text-base animate-bounce">🚀</span>
-            </div>
+        {/* 3D Sci-Fi Emblem & Logo Icon */}
+        <div className="relative mb-4 flex items-center justify-center animate-float">
+          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl p-1 shadow-[0_0_60px_rgba(0,242,254,0.7)] glow-cyan flex items-center justify-center relative group">
+            {/* Spinning Hologram Ring */}
+            <div className="absolute inset-0 rounded-3xl border-2 border-cyan-400/40 animate-pulse pointer-events-none" />
+            <img
+              src="/assets/starfarm_emblem_hd.png"
+              alt="STARFARM Bio-Crystal Sprout Emblem"
+              className="w-full h-full object-cover rounded-[22px] border-2 border-cyan-400 shadow-2xl filter drop-shadow-[0_0_20px_rgba(16,185,129,0.6)] group-hover:scale-105 transition-transform duration-300"
+              onError={(e) => {
+                e.currentTarget.src = '/starfarm_favicon.svg';
+              }}
+            />
           </div>
         </div>
 
