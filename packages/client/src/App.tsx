@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { PlayerProfile } from '@starfarm/shared';
 import { api } from './services/api';
 import { TitleScreen } from './components/TitleScreen';
+import { WorldMapView } from './components/WorldMapView';
 import { Navbar } from './components/Navbar';
 import { PlanetView } from './components/PlanetView';
 import { FarmModal } from './components/FarmModal';
@@ -20,6 +21,7 @@ export const App: React.FC = () => {
 
   // Game Flow State
   const [isPlaying, setIsPlaying] = useState(false);
+  const [gameMode, setGameMode] = useState<'MAP_EXPLORE' | 'BASE_OVERVIEW'>('MAP_EXPLORE');
 
   // Active Modals / Views
   const [isFarmOpen, setIsFarmOpen] = useState(false);
@@ -78,13 +80,16 @@ export const App: React.FC = () => {
     );
   }
 
-  // 1. Landing Title Screen before entering base
+  // 1. Landing Title Screen with full 3D interactive background
   if (!isPlaying) {
     return (
       <>
         <TitleScreen
           profile={profile}
-          onStartGame={() => setIsPlaying(true)}
+          onStartGame={() => {
+            setIsPlaying(true);
+            setGameMode('MAP_EXPLORE');
+          }}
           onOpenSettings={() => setIsSettingsOpen(true)}
         />
         {isSettingsOpen && (
@@ -96,34 +101,51 @@ export const App: React.FC = () => {
     );
   }
 
-  // 2. Main Game Environment
+  // 2. Main Gameplay Environment
   return (
-    <div className="min-h-screen bg-[#070a14] text-white flex flex-col relative selection:bg-cyan-400 selection:text-black animate-fade-in">
-      {/* Top Header Navbar */}
-      <Navbar
-        profile={profile}
-        onRefresh={fetchProfile}
-        onStartBattle={() => setIsBattleOpen(true)}
-        onOpenPlanet={() => {}}
-        onOpenHangar={() => setIsHangarOpen(true)}
-        onOpenInventory={() => setIsInventoryOpen(true)}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-      />
-
-      {/* Main Base Planet View */}
-      <main className="flex-1">
-        <PlanetView
+    <div className="min-h-screen bg-[#050b18] text-white flex flex-col relative selection:bg-cyan-400 selection:text-black select-none">
+      
+      {/* View Mode 1: 2D Top-Down Interactive RPG World Map */}
+      {gameMode === 'MAP_EXPLORE' ? (
+        <WorldMapView
           profile={profile}
           onOpenFarm={() => setIsFarmOpen(true)}
           onOpenHangar={() => setIsHangarOpen(true)}
           onOpenMarket={() => setIsMarketOpen(true)}
           onOpenGacha={() => setIsGachaOpen(true)}
           onOpenInventory={() => setIsInventoryOpen(true)}
+          onOpenSettings={() => setIsSettingsOpen(true)}
           onStartBattle={() => setIsBattleOpen(true)}
+          onToggleOverview={() => setGameMode('BASE_OVERVIEW')}
         />
-      </main>
+      ) : (
+        /* View Mode 2: 3D Base Overview Dashboard */
+        <div className="flex flex-col min-h-screen">
+          <Navbar
+            profile={profile}
+            onRefresh={fetchProfile}
+            onStartBattle={() => setIsBattleOpen(true)}
+            onOpenPlanet={() => setGameMode('MAP_EXPLORE')}
+            onOpenHangar={() => setIsHangarOpen(true)}
+            onOpenInventory={() => setIsInventoryOpen(true)}
+            onOpenSettings={() => setIsSettingsOpen(true)}
+          />
 
-      {/* Modals */}
+          <main className="flex-1">
+            <PlanetView
+              profile={profile}
+              onOpenFarm={() => setIsFarmOpen(true)}
+              onOpenHangar={() => setIsHangarOpen(true)}
+              onOpenMarket={() => setIsMarketOpen(true)}
+              onOpenGacha={() => setIsGachaOpen(true)}
+              onOpenInventory={() => setIsInventoryOpen(true)}
+              onStartBattle={() => setIsBattleOpen(true)}
+            />
+          </main>
+        </div>
+      )}
+
+      {/* Feature Modals */}
       {isFarmOpen && (
         <FarmModal
           profile={profile}
